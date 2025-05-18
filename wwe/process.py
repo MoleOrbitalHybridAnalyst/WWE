@@ -12,9 +12,14 @@ def clean_ts(ts, timestep=2.4188843e-5):
     indices = roundint( (time - time[0]) / timestep )
     for i in range(ts.shape[1]):
         np.put_along_axis(ts_res[:,i], indices, ts[:,i], axis=0)
-    if np.sum(np.isnan(ts_res)) != 0:
-        print(f"WARNING: np.sum(np.isnan(ts_res)) = {np.sum(np.isnan(ts_res))}")
-        ts_res[np.isnan(ts_res)] = np.mean(ts_res[~np.isnan(ts_res)])
+    nan_mask = np.isnan(ts_res[:,0])
+    valid_mask = ~nan_mask
+    if np.sum(nan_mask) != 0:
+        print(f"WARNING: missing {np.sum(nan_mask)} timestep(s)")
+        for d in ts_res.T:
+            d[nan_mask] = \
+            np.interp(np.arange(len(ts_res))[nan_mask],
+                      np.arange(len(ts_res))[valid_mask], d[valid_mask])
     return ts_res
 
 def sample_variance(noise_sigma, rho, n):
