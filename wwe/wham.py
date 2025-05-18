@@ -98,9 +98,14 @@ class WHAMStatistic(WHAMGaussianError):
 
         # g = log(p)
         gmean = cp.log(pl0)
-        gsamples = cp.random.multivariate_normal(
-                gmean, cov, size=nsamples,
-                check_valid='raise', method='eigh')
+        try:
+            gsamples = cp.random.multivariate_normal(
+                    gmean, cov, size=nsamples,
+                    check_valid='raise', method='eigh')
+        except TypeError:
+            gsamples = cp.random.multivariate_normal(
+                    gmean, cov, size=nsamples,
+                    check_valid='raise')
 
         # metropolis
         oldg = gmean
